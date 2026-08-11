@@ -1,0 +1,20 @@
+# Botanica by Collective Space
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /login.html
+Disallow: /.netlify/
+
+# AI assistants and answer engines are welcome — see /llms.txt for a summary
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://www.botanicabycollectivespace.com/sitemap.xml
