@@ -18,7 +18,7 @@
       '<div class="modal__veil" data-close></div>' +
       '<div class="modal__card">' +
         '<button class="modal__x" data-close aria-label="Close">&#10005;</button>' +
-        '<img class="modal__logo" src="assets/logo-full.png" alt="Botanica by Collective Space">' +
+        '<img class="modal__logo" src="assets/botanica-logo-full.png" alt="Botanica by Collective Space">' +
         '<h3 id="cm-title">Get in touch</h3>' +
         '<p class="dim" style="font-size:.9rem;margin:0">We\'d love to hear from you.</p>' +
         '<a class="modal__num" href="tel:0437125007">0437&nbsp;125&nbsp;007</a>' +
@@ -48,7 +48,7 @@
 
     // fix the logo path when the page sits in a subfolder
     var base = document.body.getAttribute('data-base') || '';
-    if (base) $('.modal__logo', modal).src = base + 'assets/logo-full.png';
+    if (base) $('.modal__logo', modal).src = base + 'assets/botanica-logo-full.png';
 
     function open(e) {
       if (e) e.preventDefault();
