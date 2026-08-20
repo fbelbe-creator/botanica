@@ -18,64 +18,38 @@
     <img class="brand__logo brand__logo--stacked" src="assets/logo-full.png"
          width="548" height="214" alt="Botanica by Collective Space">
 
-    <!-- ------------------------------------------------ Step 1: email -->
-    <section class="auth__step is-on" id="step-email">
+    <section class="auth__step is-on">
       <p class="eyebrow">Salon admin</p>
       <h1 style="font-size:clamp(1.7rem,4vw,2.2rem);margin-bottom:.35em">Sign in</h1>
       <p class="dim" style="font-size:.92rem">
-        Enter your email and we'll send a six-digit code. No password to remember.
+        Enter the salon passphrase to manage the stylist roster.
       </p>
 
-      <form id="form-email" novalidate>
+      <form id="form-login" novalidate>
         <div class="field" style="margin-top:18px">
-          <label for="email">Email address</label>
-          <input id="email" name="email" type="email" autocomplete="email"
-                 inputmode="email" required placeholder="you@example.com" autofocus>
+          <label for="passphrase">Passphrase</label>
+          <input id="passphrase" name="passphrase" type="password"
+                 autocomplete="current-password" required autofocus
+                 placeholder="••••••••••••••••">
         </div>
-        <button class="btn btn--clay" type="submit" style="width:100%;margin-top:16px">
-          <span class="lbl">Send me a code</span> <span class="arw">&#8594;</span>
-        </button>
-      </form>
 
-      <div class="msg msg--err" id="err-email">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16.2v.1"/></svg>
-        <span></span>
-      </div>
-    </section>
+        <label style="display:flex;align-items:center;gap:9px;margin-top:12px;
+                      font-size:.85rem;color:var(--muted);cursor:pointer">
+          <input type="checkbox" id="show" style="width:auto"> Show passphrase
+        </label>
 
-    <!-- ------------------------------------------------- Step 2: code -->
-    <section class="auth__step" id="step-code">
-      <p class="eyebrow">Check your inbox</p>
-      <h1 style="font-size:clamp(1.7rem,4vw,2.2rem);margin-bottom:.35em">Enter your code</h1>
-      <p class="dim" style="font-size:.92rem">
-        We sent a six-digit code to <strong id="sent-to" style="color:var(--ink)"></strong>.
-        It expires in 10 minutes.
-      </p>
-
-      <form id="form-code" novalidate>
-        <div class="field" style="margin-top:18px">
-          <label for="code">Six-digit code</label>
-          <input id="code" name="code" class="code-input" type="text" inputmode="numeric"
-                 pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code"
-                 required placeholder="000000">
-        </div>
         <button class="btn btn--clay" type="submit" style="width:100%;margin-top:16px">
           <span class="lbl">Sign in</span> <span class="arw">&#8594;</span>
         </button>
       </form>
 
-      <div class="msg msg--err" id="err-code">
+      <div class="msg msg--err" id="err">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16.2v.1"/></svg>
         <span></span>
       </div>
-      <div class="msg msg--ok" id="ok-code">
+      <div class="msg msg--ok" id="ok">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
         <span>Signed in. Taking you to the dashboard&hellip;</span>
-      </div>
-
-      <div style="display:flex;justify-content:space-between;gap:12px;margin-top:20px;flex-wrap:wrap">
-        <button class="tlink" type="button" id="back">&#8592; Use a different email</button>
-        <button class="tlink" type="button" id="resend">Resend code</button>
       </div>
     </section>
 
@@ -89,84 +63,50 @@
 <script>
 (function () {
   var $ = function (s) { return document.querySelector(s); };
-  var stepEmail = $('#step-email'), stepCode = $('#step-code');
-  var email = '';
+  var form = $('#form-login');
+  var btn  = form.querySelector('button[type=submit]');
+  var label = btn.querySelector('.lbl').textContent;
 
-  function show(el) {
-    [stepEmail, stepCode].forEach(function (s) { s.classList.remove('is-on'); });
-    el.classList.add('is-on');
-    var f = el.querySelector('input'); if (f) setTimeout(function () { f.focus(); }, 60);
+  function say(text) {
+    $('#err').querySelector('span').textContent = text;
+    $('#err').classList.add('is-on');
   }
-  function say(sel, text, kind) {
-    var box = $(sel);
-    box.querySelector('span').textContent = text;
-    box.className = 'msg msg--' + (kind || 'err') + ' is-on';
+  function clear() {
+    $('#err').classList.remove('is-on');
+    $('#ok').classList.remove('is-on');
   }
-  function clearMsgs() {
-    ['#err-email', '#err-code', '#ok-code'].forEach(function (s) { $(s).classList.remove('is-on'); });
-  }
-  function busy(form, on, label) {
-    var btn = form.querySelector('button[type=submit]');
+  function busy(on) {
     btn.disabled = on;
-    btn.querySelector('.lbl').textContent = on ? (label || 'Working…') : btn.dataset.label;
+    btn.querySelector('.lbl').textContent = on ? 'Checking…' : label;
   }
-
-  // remember the original button labels
-  document.querySelectorAll('button[type=submit]').forEach(function (b) {
-    b.dataset.label = b.querySelector('.lbl').textContent;
-  });
 
   // already signed in? go straight through
   if (BotanicaAuth.token()) location.replace('admin.html');
 
-  $('#form-email').addEventListener('submit', function (e) {
-    e.preventDefault(); clearMsgs();
-    var v = $('#email').value.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) {
-      return say('#err-email', 'That email address doesn\'t look right.');
-    }
-    email = v;
-    busy(this, true, 'Sending…');
-    var form = this;
-    BotanicaAuth.requestCode(email)
-      .then(function (res) {
-        busy(form, false);
-        $('#sent-to').textContent = res.sentTo || 'the salon owner';
-        show(stepCode);
-        if (res.devCode) say('#err-code', 'Preview mode — your code is ' + res.devCode, 'info');
-      })
-      .catch(function (err) { busy(form, false); say('#err-email', err.message); });
+  $('#show').addEventListener('change', function () {
+    $('#passphrase').type = this.checked ? 'text' : 'password';
   });
 
-  $('#form-code').addEventListener('submit', function (e) {
-    e.preventDefault(); clearMsgs();
-    var code = $('#code').value.replace(/\D/g, '');
-    if (code.length !== 6) return say('#err-code', 'Enter the six digits from the email.');
-    busy(this, true, 'Checking…');
-    var form = this;
-    BotanicaAuth.verifyCode(email, code)
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    clear();
+
+    var value = $('#passphrase').value;
+    if (!value) return say('Enter your passphrase.');
+
+    busy(true);
+    BotanicaAuth.signIn(value)
       .then(function () {
-        busy(form, false);
-        $('#ok-code').classList.add('is-on');
-        setTimeout(function () { location.href = 'admin.html'; }, 700);
+        busy(false);
+        $('#ok').classList.add('is-on');
+        setTimeout(function () { location.href = 'admin.html'; }, 500);
       })
-      .catch(function (err) { busy(form, false); say('#err-code', err.message); });
-  });
-
-  $('#back').addEventListener('click', function () { clearMsgs(); show(stepEmail); });
-  $('#resend').addEventListener('click', function () {
-    clearMsgs();
-    BotanicaAuth.requestCode(email)
-      .then(function (res) {
-        say('#err-code', res.devCode ? 'Preview mode — your code is ' + res.devCode : 'A new code is on its way.', 'info');
-      })
-      .catch(function (err) { say('#err-code', err.message); });
-  });
-
-  // auto-submit once six digits are in
-  $('#code').addEventListener('input', function () {
-    this.value = this.value.replace(/\D/g, '').slice(0, 6);
-    if (this.value.length === 6) $('#form-code').requestSubmit();
+      .catch(function (err) {
+        busy(false);
+        $('#passphrase').value = '';
+        $('#passphrase').focus();
+        say(err.message);
+      });
   });
 })();
 </script>

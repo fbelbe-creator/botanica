@@ -41,6 +41,7 @@
 <link rel="icon" href="assets/favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="assets/logo-mark.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://www.googletagmanager.com">
 <link rel="preconnect" href="https://cdn.prod.website-files.com">
 
 <!-- Structured data: helps Google, and gives AI assistants clean facts to quote (GEO) -->
@@ -80,8 +81,19 @@
   ]
 }
 </script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-MZ78KMR');</script>
+<!-- End Google Tag Manager -->
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MZ78KMR"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 
 <div class="progress"></div>
 
@@ -188,7 +200,15 @@
           </ul>
         </div>
 
-        <form class="form" data-demo novalidate>
+        <!-- Join the team (chair hire). Netlify detects this at deploy time; submissions appear in
+             Site configuration > Forms. -->
+        <form class="form" name="stylist-enquiry" method="POST"
+              data-netlify="true" netlify-honeypot="bot-field"
+              action="/thanks.html" data-demo novalidate>
+          <input type="hidden" name="form-name" value="stylist-enquiry">
+          <p class="sr" aria-hidden="true">
+            <label>Leave this field empty: <input name="bot-field" tabindex="-1" autocomplete="off"></label>
+          </p>
           <div class="field"><label for="s-first">First name</label><input id="s-first" name="first" required autocomplete="given-name"></div>
           <div class="field"><label for="s-last">Last name</label><input id="s-last" name="last" required autocomplete="family-name"></div>
           <div class="field"><label for="s-phone">Phone</label><input id="s-phone" name="phone" type="tel" required autocomplete="tel"></div>
@@ -207,6 +227,7 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
               Thank you — your enquiry has been received. We'll be in touch shortly.
             </div>
+            <div class="form-error"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16.2v.1"/></svg><span></span></div>
           </div>
         </form>
       </div>
