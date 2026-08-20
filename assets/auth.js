@@ -1,23 +1,20 @@
 /* ==========================================================================
    Botanica — admin auth client
    --------------------------------------------------------------------------
-   Passwordless sign-in, exactly as specified:
+   Passphrase sign-in.
 
-     1. Someone enters an email on login.html.
-     2. The server generates a six-digit code and EMAILS IT TO THE OWNER —
-        never to whoever typed the address. So an outsider can request a code
-        all day and only the owner ever receives one.
-     3. They come back to the login screen and enter the code.
-     4. The server checks it and issues a signed session token, kept in
+     1. You enter the passphrase on login.html.
+     2. It's posted to the server, which compares it to ADMIN_PASSPHRASE
+        (set in Netlify's environment variables — never in this code).
+     3. If it matches, the server issues a signed session token, held in
         sessionStorage and sent as a Bearer token on admin requests.
 
-   Codes expire after 10 minutes and are single-use. The server also rate
-   limits requests per email address.
+   The session lasts 8 hours and disappears when you close the tab.
 
-   DEMO MODE: opened straight from disk (file://) there is no backend, so this
-   falls back to a local simulation that shows the code on screen. That exists
-   so you can click through the admin before deploying — it is not security,
-   and it switches itself off automatically once the site is on Netlify.
+   PREVIEW MODE: opened straight from disk (file://) there is no server, so
+   this lets you in without checking anything. That exists purely so the admin
+   can be demonstrated offline — it is not security, and it switches itself off
+   automatically once the site is on Netlify.
    ========================================================================== */
 window.BotanicaAuth = (function () {
   'use strict';
@@ -41,26 +38,6 @@ window.BotanicaAuth = (function () {
     });
   }
 
-  /* ----------------------------------------------------------- demo mode */
-  function demoRequest(email) {
-    var code = String(Math.floor(100000 + Math.random() * 900000));
-    sessionStorage.setItem('botanica.demo', JSON.stringify({
-      email: email, code: code, expires: Date.now() + 10 * 60 * 1000
-    }));
-    return Promise.resolve({ ok: true, sentTo: 'the salon owner', devCode: code });
-  }
-  function demoVerify(email, code) {
-    var raw = sessionStorage.getItem('botanica.demo');
-    if (!raw) return Promise.reject(new Error('That code has expired. Please request a new one.'));
-    var d = JSON.parse(raw);
-    if (Date.now() > d.expires) return Promise.reject(new Error('That code has expired. Please request a new one.'));
-    if (d.code !== code) return Promise.reject(new Error('That code isn\'t right. Check the email and try again.'));
-    sessionStorage.removeItem('botanica.demo');
-    save({ token: 'demo.' + Date.now(), email: email, demo: true });
-    return Promise.resolve({ ok: true });
-  }
-
-  /* ------------------------------------------------------------- session */
   function save(s) { sessionStorage.setItem(KEY, JSON.stringify(s)); }
   function session() {
     try { return JSON.parse(sessionStorage.getItem(KEY) || 'null'); } catch (e) { return null; }
@@ -69,25 +46,26 @@ window.BotanicaAuth = (function () {
   return {
     isDemo: function () { return DEMO; },
     token: function () { var s = session(); return s && s.token; },
-    email: function () { var s = session(); return s && s.email; },
+    email: function () { var s = session(); return s && s.label; },
 
-    requestCode: function (email) {
-      if (DEMO) return demoRequest(email);
-      return post('request-code', { email: email });
-    },
+    /* Sign in with the passphrase. */
+    signIn: function (passphrase) {
+      if (!passphrase) return Promise.reject(new Error('Enter your passphrase.'));
 
-    verifyCode: function (email, code) {
-      if (DEMO) return demoVerify(email, code);
-      return post('verify-code', { email: email, code: code }).then(function (res) {
+      if (DEMO) {
+        save({ token: 'demo.' + Date.now(), label: 'Preview mode', demo: true });
+        return Promise.resolve({ ok: true });
+      }
+
+      return post('sign-in', { passphrase: passphrase }).then(function (res) {
         if (!res.token) throw new Error('Sign-in failed. Please try again.');
-        save({ token: res.token, email: res.email || email });
+        save({ token: res.token, label: 'Salon admin' });
         return res;
       });
     },
 
     signOut: function () {
       sessionStorage.removeItem(KEY);
-      sessionStorage.removeItem('botanica.demo');
     },
 
     /* Guard for admin.html — bounces anyone without a session to the login. */
