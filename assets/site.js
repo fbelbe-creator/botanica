@@ -18,7 +18,7 @@
       '<div class="modal__veil" data-close></div>' +
       '<div class="modal__card">' +
         '<button class="modal__x" data-close aria-label="Close">&#10005;</button>' +
-        '<img class="modal__logo" src="assets/botanica-logo-full.png" alt="Botanica by Collective Space">' +
+        '<img class="modal__logo" src="assets/logo-full.png" alt="Botanica by Collective Space">' +
         '<h3 id="cm-title">Get in touch</h3>' +
         '<p class="dim" style="font-size:.9rem;margin:0">We\'d love to hear from you.</p>' +
         '<a class="modal__num" href="tel:0437125007">0437&nbsp;125&nbsp;007</a>' +
@@ -48,7 +48,7 @@
 
     // fix the logo path when the page sits in a subfolder
     var base = document.body.getAttribute('data-base') || '';
-    if (base) $('.modal__logo', modal).src = base + 'assets/botanica-logo-full.png';
+    if (base) $('.modal__logo', modal).src = base + 'assets/logo-full.png';
 
     function open(e) {
       if (e) e.preventDefault();
@@ -373,6 +373,22 @@
           // let Google Tag Manager see it as a conversion
           window.dataLayer = window.dataLayer || [];
           window.dataLayer.push({ event: 'form_submission', form_name: name });
+
+          /* Don't strand them at the bottom of a form they've finished with.
+             Hold the confirmation long enough to read, then carry them back
+             up to the top of the page they were reading. */
+          setTimeout(function () {
+            if (history.replaceState) {
+              history.replaceState(null, '', location.pathname + location.search);
+            }
+            try {
+              window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+            } catch (e) {
+              window.scrollTo(0, 0);   // older browsers ignore the options object
+            }
+            // clear the confirmation once they're back up, ready for next time
+            setTimeout(function () { if (ok) ok.classList.remove('is-on'); }, 1200);
+          }, 2400);
         }
 
         function failed() {

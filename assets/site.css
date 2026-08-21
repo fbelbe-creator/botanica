@@ -49,7 +49,7 @@
 
   --maxw: 1240px;
   --gut: clamp(20px, 5vw, 56px);
-  --nav-h: 112px;
+  --nav-h: 78px;
 }
 
 /* ---------- Reset ---------- */
@@ -73,9 +73,12 @@ input,select,textarea{ font:inherit; color:inherit; }
 h1,h2,h3,h4{
   font-family:'Fraunces',Georgia,serif;
   font-weight:400;
-  line-height:1.06;
+  /* 1.06 clipped the descenders on italic letters — y, p, g — wherever a
+     heading sits inside an overflow:hidden reveal box. 1.16 clears them
+     and still reads as tight editorial setting. */
+  line-height:1.16;
   letter-spacing:-.018em;
-  margin:0 0 .5em;
+  margin:0 0 .64em;
 }
 h1{ font-size:clamp(2.85rem,7.4vw,5.6rem); }
 h2{ font-size:clamp(2.05rem,4.4vw,3.5rem); }
@@ -105,7 +108,11 @@ p{ margin:0 0 1.1em; color:var(--ink-2); }
 }
 .eyebrow--center::before{ display:none; }
 .lead{ font-size:clamp(1.02rem,1.35vw,1.18rem); color:var(--ink-2); }
-.serif-accent{ font-family:'Fraunces',serif; font-style:italic; color:var(--gold-deep); font-weight:400; }
+.serif-accent{
+  font-family:'Fraunces',serif; font-style:italic; color:var(--gold-deep); font-weight:400;
+  /* italic descenders overhang further than upright ones */
+  padding-bottom:.04em;
+}
 .dim{ color:var(--muted); }
 
 /* ---------- Buttons ---------- */
@@ -172,7 +179,7 @@ p{ margin:0 0 1.1em; color:var(--ink-2); }
   border-bottom:1px solid rgba(214,203,182,.5);
   transition:opacity .5s var(--ease);
 }
-.nav.is-stuck{ height:82px; }
+.nav.is-stuck{ height:66px; }
 .nav.is-stuck::before{ opacity:1; }
 .nav__inner{
   position:relative; width:100%; max-width:var(--maxw); margin-inline:auto;
@@ -182,25 +189,16 @@ p{ margin:0 0 1.1em; color:var(--ink-2); }
 /* --- Brand logo (real artwork, see assets/logo-*.png) --- */
 .brand{ display:flex; align-items:center; flex:0 0 auto; }
 .brand__logo{
-  display:block; height:92px; width:auto; max-width:min(236px,34vw); object-fit:contain; flex:0 0 auto;
+  height:44px; width:auto; flex:0 0 auto;
   transition:transform .6s var(--ease), opacity .4s var(--ease);
 }
 .brand:hover .brand__logo{ transform:scale(1.03); }
-.nav.is-stuck .brand__logo{ height:64px; }
+.nav.is-stuck .brand__logo{ height:38px; }
 .brand__logo--stacked{ height:auto; width:190px; }
-.brand__logo--drawer{ height:auto; width:min(300px,76vw); max-width:300px; }
-.brand__logo--footer{ height:auto; width:min(280px,100%); max-width:280px; }
 /* the emblem-only mark, used where space is tight */
 .brand__mark{ width:38px; height:38px; flex:0 0 auto; transition:transform .6s var(--ease); }
 .brand:hover .brand__mark{ transform:rotate(-4deg) scale(1.06); }
-@media(max-width:420px){
-  :root{ --nav-h:88px; }
-  .nav.is-stuck{ height:72px; }
-  .brand__logo{ height:68px; max-width:174px; }
-  .nav.is-stuck .brand__logo{ height:56px; }
-  .brand__logo--drawer{ height:auto; width:min(260px,76vw); max-width:260px; }
-  .brand__logo--footer{ height:auto; width:min(240px,100%); max-width:240px; }
-}
+@media(max-width:420px){ .brand__logo{ height:34px; } }
 
 .nav__links{ display:flex; align-items:center; gap:clamp(14px,2vw,30px); }
 .nav__link{
@@ -261,7 +259,7 @@ body.menu-open .drawer a.drawer__link:nth-child(6){ transition-delay:.46s }
 .drawer__foot{ margin-top:34px; display:flex; gap:12px; flex-wrap:wrap; }
 
 /* ---- Mobile / tablet: collapse the whole nav into a hamburger ---- */
-@media (max-width:1180px){
+@media (max-width:1100px){
   .nav__links{ display:none; }
   .burger{ display:grid; }
   .nav__cta .btn{ display:none; }   /* the CTA moves into the drawer */
@@ -315,12 +313,13 @@ body.menu-open .drawer a.drawer__link:nth-child(6){ transition-delay:.46s }
   position:relative; z-index:2;
   display:grid; grid-template-columns:1.06fr .94fr; gap:clamp(30px,5vw,72px); align-items:center;
 }
-.hero__copy{ min-width:0; max-width:650px; }
-.hero h1{
-  max-width:10.5ch; margin-bottom:.28em;
-  font-size:clamp(3rem,6.6vw,5.25rem); line-height:.94; letter-spacing:-.025em;
+.hero h1{ margin-bottom:.44em; }
+.hero h1 .line{
+  display:block; overflow:hidden;
+  /* the mask must sit lower than the glyphs or descenders get sliced off;
+     the negative margin cancels the extra height so layout is unchanged */
+  padding-bottom:.16em; margin-bottom:-.16em;
 }
-.hero h1 .line{ display:block; overflow:hidden; }
 .hero h1 .line > span{
   display:block; transform:translateY(112%);
   animation:riseIn 1.05s var(--ease) forwards;
@@ -807,7 +806,7 @@ body.menu-open .drawer a.drawer__link:nth-child(6){ transition-delay:.46s }
 }
 .modal.is-open .modal__card{ transform:none; }
 .modal__card h3{ margin:0 0 .25em; font-size:clamp(1.5rem,3vw,1.9rem); }
-.modal__logo{ width:min(270px,86%); height:auto; object-fit:contain; margin:0 auto 18px; }
+.modal__logo{ width:132px; margin:0 auto 18px; }
 .modal__num{
   display:block; font-family:'Fraunces',serif; font-size:clamp(1.7rem,4.6vw,2.2rem);
   color:var(--gold-deep); letter-spacing:.01em; margin:6px 0 4px;
