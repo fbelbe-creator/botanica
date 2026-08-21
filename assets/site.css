@@ -80,8 +80,8 @@ h1,h2,h3,h4{
   letter-spacing:-.018em;
   margin:0 0 .64em;
 }
-h1{ font-size:clamp(2.85rem,7.4vw,5.6rem); }
-h2{ font-size:clamp(2.05rem,4.4vw,3.5rem); }
+h1{ font-size:clamp(2.85rem,7.4vw,5.6rem); line-height:1.14; }
+h2{ font-size:clamp(2.05rem,4.4vw,3.5rem); line-height:1.18; }
 h3{ font-size:clamp(1.25rem,2vw,1.65rem); }
 p{ margin:0 0 1.1em; color:var(--ink-2); }
 ::selection{ background:var(--navy); color:var(--cream); }
@@ -416,7 +416,10 @@ body.menu-open .drawer a.drawer__link:nth-child(6){ transition-delay:.46s }
 [data-reveal="right"]{ transform:translateX(30px); }
 [data-reveal="zoom"]{ transform:scale(.94); }
 [data-reveal="mask"]{ opacity:1; clip-path:inset(0 0 100% 0); transform:none; transition:clip-path 1.1s var(--ease); }
-[data-reveal].in{ opacity:1; transform:none; clip-path:inset(0 0 0 0); }
+[data-reveal].in{ opacity:1; transform:none; clip-path:none; }
+/* the mask variant is the only one that genuinely needs a clip; leave it
+   slack on the sides and underneath so descenders survive the reveal */
+[data-reveal="mask"].in{ clip-path:inset(0 -.6em -.45em -.6em); }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
   [data-reveal]{ opacity:1 !important; transform:none !important; clip-path:none !important; }
