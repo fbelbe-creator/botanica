@@ -418,7 +418,20 @@
     boot(window.BOTANICA_STYLISTS || []);
   } else {
     BotanicaAuth.api('get-stylists')
-      .then(function (d) { boot((d && (d.stylists || d)) || window.BOTANICA_STYLISTS || []); })
+      .then(function (d) {
+        /* An empty array is truthy in JavaScript, so `list || fallback` would
+           happily hand us nothing at all. Check the length explicitly: nothing
+           has ever been saved to the live store on a fresh site, and showing an
+           empty roster there makes it look like the stylists were lost. */
+        var live = d && d.stylists;
+        if (!Array.isArray(live)) live = Array.isArray(d) ? d : null;
+
+        if (live && live.length) return boot(live);
+
+        boot(window.BOTANICA_STYLISTS || []);
+        flash('#failed', 'Nothing saved to the live roster yet, so this is the bundled copy. ' +
+                         'Click "Save changes" to publish it.');
+      })
       .catch(function () {
         boot(window.BOTANICA_STYLISTS || []);
         flash('#failed', 'Couldn\'t load the live roster, so this is the bundled copy. Saving will overwrite the live list.');
