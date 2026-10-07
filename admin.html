@@ -119,11 +119,11 @@
         </div>
 
         <div class="field field--full">
-          <label for="f-img">Photo URL <span style="color:#A84040">*</span></label>
-          <input id="f-img" name="img" required placeholder="https://…">
-          <p class="form__note" style="margin:2px 0 0">
-            Paste a link to the photo. Upload it to the salon's image host or Instagram first.
-          </p>
+          <label for="f-img">Stylist photo <span style="color:#A84040">*</span></label>
+          <input id="f-img" name="img" type="hidden" required>
+          <input id="f-photo-file" type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden>
+          <button class="btn btn--ghost" type="button" id="upload-photo">Upload photo</button>
+          <span id="photo-name" class="form__note" style="margin-left:10px">Choose an image from your device (up to 3.5 MB).</span>
           <img id="preview" alt="" style="margin-top:10px;width:110px;height:110px;object-fit:cover;
                border-radius:16px;border:1px solid var(--sand);background:var(--cream-2);display:none">
         </div>
@@ -270,6 +270,7 @@
     var img = $('#preview');
     img.style.display = v ? 'block' : 'none';
     if (v) img.src = v;
+    $('#photo-name').textContent = v ? 'Photo selected' : 'Choose an image from your device (up to 3.5 MB).';
   }
   function updateBioCount() { $('#bio-count').textContent = $('#f-bio').value.length; }
 
@@ -284,7 +285,7 @@
     var img  = $('#f-img').value.trim();
     if (!name)  return flash('#failed', 'A name is required.');
     if (!tel)   return flash('#failed', 'A phone number is required — it\'s how clients book.');
-    if (!img)   return flash('#failed', 'A photo URL is required.');
+    if (!img)   return flash('#failed', 'Please upload a stylist photo.');
 
     var data = {
       name: name,
@@ -324,6 +325,24 @@
     if (e.key === 'Escape' && $('#sheet').classList.contains('is-open')) closeSheet();
   });
   $('#f-img').addEventListener('input', updatePreview);
+  $('#upload-photo').addEventListener('click', function () { $('#f-photo-file').click(); });
+  $('#f-photo-file').addEventListener('change', function () {
+    var file = this.files && this.files[0];
+    if (!file) return;
+    var allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+    if (allowed.indexOf(file.type) < 0) { flash('#failed', 'Choose a JPG, PNG, WebP or AVIF image.'); this.value = ''; return; }
+    if (file.size > 3.5 * 1024 * 1024) { flash('#failed', 'That image is too large. Choose a file under 3.5 MB.'); this.value = ''; return; }
+    var button = $('#upload-photo');
+    button.disabled = true; button.textContent = 'Uploading…';
+    BotanicaAuth.uploadPhoto(file).then(function (result) {
+      $('#f-img').value = result.url;
+      updatePreview();
+      $('#photo-name').textContent = file.name;
+      flash('#saved', 'Photo uploaded. Save changes to publish it.');
+    }).catch(function (err) {
+      flash('#failed', err.message + ' You can try the upload again.');
+    }).then(function () { button.disabled = false; button.textContent = 'Upload photo'; });
+  });
   $('#f-bio').addEventListener('input', updateBioCount);
 
   /* ------------------------------------------------------------ actions */

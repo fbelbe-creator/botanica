@@ -102,6 +102,9 @@ In the dashboard you can:
 - **Export JSON** to keep an offline backup
 
 Every save keeps the previous version as a dated backup in Blobs, so a mistake is recoverable.
+Use **Upload photo** in a stylist form to choose a JPG, PNG, WebP or AVIF image (up to 3.5 MB)
+from your computer. Photos are stored in Netlify Blobs and served by a public image function;
+the image URL is saved with the roster. No separate image host setup is needed.
 
 ### Opening admin.html from your computer
 
@@ -130,7 +133,7 @@ Once the site is on Netlify, that mode switches itself off.
 | `assets/stylists.js` | The bundled copy of the roster — the safety net if the server is unreachable. |
 | `assets/roster.js` | Draws the stylist cards on the public page. |
 | `assets/auth.js` | The sign-in flow. |
-| `netlify/functions/` | The four server endpoints. |
+| `netlify/functions/` | The server endpoints, including protected photo uploads and public photo delivery. |
 | `llms.txt` | A plain-language summary of the salon for AI assistants. |
 
 ---

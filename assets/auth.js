@@ -137,6 +137,20 @@ window.BotanicaAuth = (function () {
         }
         throw new Error('Couldn\'t reach the server — an ad blocker or extension may be blocking it.');
       });
+    },
+
+    uploadPhoto: function (file) {
+      return fetch(API + 'upload-stylist-photo', {
+        method: 'POST',
+        headers: { 'authorization': 'Bearer ' + this.token(), 'content-type': file.type },
+        body: file
+      }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (data) {
+          if (r.status === 401) { window.BotanicaAuth.signOut(); location.replace('login.html'); return; }
+          if (!r.ok) throw new Error(data.error || 'Photo upload failed.');
+          return data;
+        });
+      }, function () { throw new Error('Can’t reach the server. Check your connection and try again.'); });
     }
   };
 })();

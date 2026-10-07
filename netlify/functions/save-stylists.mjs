@@ -19,7 +19,7 @@ function clean(p, i) {
 
   const url = (v) => {
     const s = str(v, 500);
-    return /^https?:\/\//i.test(s) ? s : '';
+    return /^https?:\/\//i.test(s) || /^\/\.netlify\/functions\/get-stylist-photo\?key=[0-9a-f-]{36}\.(?:jpg|png|webp|avif)$/i.test(s) ? s : '';
   };
 
   return {
